@@ -1,12 +1,11 @@
 import React from 'react';
-import { ScrollView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, Image, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
-
+import axios from 'axios';
 import { connect } from 'react-redux';
 import * as actions from '../../actions';
 
 import Colors from '../../constants/Colors';
-import { Card } from '../../components/Card';
 
 
 class TruckerScreen extends React.Component {
@@ -33,46 +32,81 @@ class TruckerScreen extends React.Component {
     };
 
   constructor(props){
-      super(props)
+    super(props)
   }
 
-  onPressMe = () => {
-      console.log(this.props.default_value);
-      this.props.toggleProfileState(this.props.default_value)
+  componentWillMount = () => {
+      this.props.fetchData()
   }
 
-  pressedRender = () => {
-      if (this.props.default_value === true){
+  renderCoverImage = () => {
+      if (this.props.isFetching === false){
           return (
-             <Text>
-                (Press Me: True)
-             </Text>
+              <Image
+                 style={styles.imageStyle}
+                 source={{ uri: this.props.data.cover }}
+              />
+          )
+      } else {
+          return (
+              <View
+                style={styles.imageStyle}
+              >
+                <ActivityIndicator />
+              </View>
+
           )
       }
+  }
+
+  renderTitle = () => {
       return (
-         <Text>
-            (Press Me: False)
-         </Text>
+          <Text
+            style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10 }}
+          >
+            {this.props.data.title}
+          </Text>
+      )
+  }
+
+  renderArtist = () => {
+      return (
+          <Text>
+            {this.props.data.artist}
+          </Text>
       )
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Card
-            style={styles.TestContainerStyle}
-        >
-            <TouchableOpacity
-                style={styles.TestTouchableStyle}
-                onPress={this.onPressMe}
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}
+          >
+            <View
+                style={[styles.sideButtonStyle, {marginLeft: 5}]}
             >
-              <Text
-                style={{ color: 'white' }}
-              >
-                {this.pressedRender()}
-              </Text>
-            </TouchableOpacity>
-        </Card>
+            </View>
+            {this.renderCoverImage()}
+            <View
+                style={[styles.sideButtonStyle, {marginRight: 5}]}
+            >
+            </View>
+          </View>
+
+          <View
+            style={{ alignItems: 'center', marginTop: 10, justifyContent: 'space-between' }}
+          >
+            {this.renderTitle()}
+            {this.renderArtist()}
+          </View>
+
+          <View>
+
+          </View>
+
+
+
       </View>
     );
   }
@@ -82,26 +116,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    justifyContent: 'center',
     alignItems: 'center',
   },
-  TestTouchableStyle: {
-      height: 100,
-      width: 100,
+  imageViewStyle: {
       backgroundColor: Colors.tintColor,
       alignItems: 'center',
       justifyContent: 'center',
   },
-  TestContainerStyle: {
+  imageContainerStyle: {
       alignItems: 'center',
       justifyContent: 'center',
+  },
+  sideButtonStyle: {
+      backgroundColor: Colors.lighttintColor,
+      width: 20,
+      marginTop: 10,
+      marginBottom: 10,
+  },
+  imageStyle: {
+      height: 250,
+      flex: 1,
+      width: null,
+      marginLeft: 20,
+      marginRight: 20,
+      justifyContent: 'center',
+      alignItems: 'center'
   }
 });
 
 const mapStateToProps = (state) => {
     return {
-        default_value: state.TruckerReducer.default_value
+        data: state.TruckerReducer.data,
+        isFetching: state.TruckerReducer.isFetching,
+        error: state.TruckerReducer.error,
     }
 }
+
 
 export default connect(mapStateToProps, actions)(TruckerScreen);
